@@ -44,7 +44,7 @@ function Checkout() {
     );
 
   function validate() {
-    const e: Partial<Record<string, string>> & Record<string, string> = {} as never;
+    const e: { [k: string]: string } = {};
     if (f.customerName.trim().length < 2) e.customerName = "نام و نام خانوادگی را وارد کنید";
     if (!isValidMobile(f.mobile)) e.mobile = "شمارهٔ موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد";
     if (!f.province) e.province = "استان را انتخاب کنید";
