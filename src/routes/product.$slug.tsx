@@ -32,7 +32,7 @@ function ProductPage() {
   const { slug } = Route.useLoaderData();
   const p = getProductBySlug(slug)!;
   const { add } = useCart();
-  const [variantId, setVariantId] = useState(p.variants[0].id);
+  const [variantId, setVariantId] = useState(p.variants[0]!.id);
   const [qty, setQty] = useState(1);
   const v = p.variants.find((x) => x.id === variantId)!;
   const out = p.stock <= 0;

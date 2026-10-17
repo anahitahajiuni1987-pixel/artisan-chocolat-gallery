@@ -44,7 +44,7 @@ function Checkout() {
     );
 
   function validate() {
-    const e: Record<string, string> = {};
+    const e: Partial<Record<string, string>> & Record<string, string> = {} as never;
     if (f.customerName.trim().length < 2) e.customerName = "نام و نام خانوادگی را وارد کنید";
     if (!isValidMobile(f.mobile)) e.mobile = "شمارهٔ موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد";
     if (!f.province) e.province = "استان را انتخاب کنید";
@@ -58,7 +58,7 @@ function Checkout() {
 
   async function submit(ev: React.FormEvent) {
     ev.preventDefault();
-    if (!validate()) return toast.error("لطفاً خطاهای فرم را بررسی کنید");
+    if (!validate()) { toast.error("لطفاً خطاهای فرم را بررسی کنید"); return; }
     setBusy(true);
     try {
       const res = await send({ data: { ...f, lines: lines.map(({ key: _k, ...l }) => l) } });

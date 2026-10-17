@@ -7,7 +7,7 @@ import { ORDER_STATUS, toman } from "@/lib/catalog";
 import { getOrder, uploadReceipt } from "@/lib/orders.functions";
 
 export const Route = createFileRoute("/order/$code")({
-  validateSearch: (s: Record<string, unknown>): { m?: string } => ({ m: typeof s.m === "string" ? s.m.slice(0, 20) : undefined }),
+  validateSearch: (s: Record<string, unknown>): { m?: string | undefined } => ({ m: typeof s["m"] === "string" ? s["m"].slice(0, 20) : undefined }),
   head: () => ({
     meta: [
       { title: "پیگیری سفارش | آناهیتا" },
@@ -30,7 +30,7 @@ function OrderPage() {
   const q = useQuery({ queryKey: ["order", code, m], enabled: !!m, queryFn: () => fetchOrder({ data: { code, mobile: m! } }) });
 
   async function onFile(file: File) {
-    if (file.size > 5 * 1024 * 1024) return toast.error("حجم فایل باید کمتر از ۵ مگابایت باشد");
+    if (file.size > 5 * 1024 * 1024) { toast.error("حجم فایل باید کمتر از ۵ مگابایت باشد"); return; }
     setBusy(true);
     try {
       const buf = new Uint8Array(await file.arrayBuffer());
