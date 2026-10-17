@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { useRef, type ReactNode } from "react";
 import { PRODUCTS } from "@/lib/catalog";
 import { ProductCard } from "@/components/store/ProductCard";
@@ -94,14 +94,7 @@ export function ExperienceSequence() {
                   </div>
                 </motion.div>
               )}
-              {!reduced && FLY.map((src, i) => {
-                const side = i % 2 === 0 ? 1 : -1;
-                return (
-                  <motion.img key={i} src={src} alt="" loading="lazy" width={200} height={200}
-                    style={{ opacity: flyOp, x: useTransformX(flyIn, side * (140 + i * 30)), y: useTransformX(flyIn, (i < 2 ? -1 : 1) * 80) }}
-                    className={`absolute h-20 w-20 rounded-full object-cover ring-2 ring-gold/50 md:h-28 md:w-28 ${["-top-10 -right-6", "-top-12 left-10", "-bottom-10 right-16", "-bottom-8 -left-6"][i]}`} />
-                );
-              })}
+              {!reduced && FLY.map((src, i) => <FlyImg key={i} src={src} i={i} progress={flyIn} opacity={flyOp} />)}
             </motion.div>
           </div>
         </div>
@@ -110,9 +103,15 @@ export function ExperienceSequence() {
   );
 }
 
-// Small helper so the per-image transforms are declared consistently (hook count is fixed: FLY is constant).
-function useTransformX(v: ReturnType<typeof useTransform<number, number>>, dist: number) {
-  return useTransform(v, (n: number) => n * dist);
+function FlyImg({ src, i, progress, opacity }: { src: string; i: number; progress: MotionValue<number>; opacity: MotionValue<number> }) {
+  const side = i % 2 === 0 ? 1 : -1;
+  const x = useTransform(progress, (n) => n * side * (140 + i * 30));
+  const y = useTransform(progress, (n) => n * (i < 2 ? -80 : 80));
+  const pos = ["-top-10 -right-6", "-top-12 left-10", "-bottom-10 right-16", "-bottom-8 -left-6"][i];
+  return (
+    <motion.img src={src} alt="" loading="lazy" width={200} height={200} style={{ opacity, x, y }}
+      className={`absolute h-20 w-20 rounded-full object-cover ring-2 ring-gold/50 md:h-28 md:w-28 ${pos}`} />
+  );
 }
 
 export function CraftedByHand() {
