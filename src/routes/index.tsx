@@ -1,24 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Hero } from "@/components/home/Hero";
+import { BrandStory, CraftedByHand, ExperienceSequence, FinalCTA, GiftsForMoments, Reveal, SignatureCollection } from "@/components/home/Sections";
+import { BoxBuilder } from "@/components/store/BoxBuilder";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "آناهیتا | تکه‌ای کوچک از هنر — شکلات دست‌ساز" },
+      { name: "description", content: "شکلات‌های دست‌ساز، جعبه‌های هدیه و جعبهٔ دلخواه با پیام شخصی. ارسال به سراسر ایران." },
+      { property: "og:title", content: "آناهیتا | تکه‌ای کوچک از هنر" },
+      { property: "og:description", content: "شکلات‌های دست‌ساز و جعبه‌های هدیهٔ آناهیتا" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <>
+      <Hero />
+      <SignatureCollection />
+      <ExperienceSequence />
+      <CraftedByHand />
+      <GiftsForMoments />
+      <section className="container-lux py-28 md:py-36">
+        <Reveal className="mb-14 max-w-2xl">
+          <p className="eyebrow mb-4">۰۵ — جعبهٔ خودتان را بسازید</p>
+          <h2 className="text-4xl md:text-5xl">هدیه‌ای که فقط شما می‌توانستید بچینید</h2>
+        </Reveal>
+        <BoxBuilder />
+      </section>
+      <BrandStory />
+      <FinalCTA />
+    </>
   );
 }
