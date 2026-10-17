@@ -18,7 +18,7 @@ export const Route = createFileRoute("/cart")({
 
 function lineImage(l: CartLine) {
   if (l.kind === "product") return getProduct(l.productId)?.image;
-  return getProduct(l.picks[0])?.image;
+  return getProduct(l.picks[0] ?? "")?.image;
 }
 
 function CartPage() {

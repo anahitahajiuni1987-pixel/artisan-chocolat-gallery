@@ -6,7 +6,7 @@ import { toman, type Product } from "@/lib/catalog";
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
-  const v = product.variants[0];
+  const v = product.variants[0]!;
   const out = product.stock <= 0;
   return (
     <article className="group">

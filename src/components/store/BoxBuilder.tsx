@@ -22,7 +22,7 @@ export function BoxBuilder() {
   }, [picks, size]);
 
   function choose(id: string) {
-    if (full) return toast.message("جعبه پر است — برای جایگزینی یک قطعه را حذف کنید");
+    if (full) { toast.message("جعبه پر است — برای جایگزینی یک قطعه را حذف کنید"); return; }
     setPicks((p) => [...p, id]);
   }
   function changeSize(id: string) {
@@ -35,7 +35,8 @@ export function BoxBuilder() {
     try {
       priceLine(line);
     } catch (e) {
-      return toast.error((e as Error).message);
+      toast.error((e as Error).message);
+      return;
     }
     add(line);
     toast.success("جعبهٔ شما به سبد اضافه شد", { action: { label: "مشاهدهٔ سبد", onClick: () => navigate({ to: "/cart" }) } });

@@ -45,13 +45,13 @@ function Checkout() {
 
   function validate() {
     const e: { [k: string]: string } = {};
-    if (f.customerName.trim().length < 2) e.customerName = "نام و نام خانوادگی را وارد کنید";
-    if (!isValidMobile(f.mobile)) e.mobile = "شمارهٔ موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد";
-    if (!f.province) e.province = "استان را انتخاب کنید";
-    if (!f.city) e.city = "شهر را انتخاب کنید";
-    if (f.address.trim().length < 10) e.address = "نشانی کامل را وارد کنید";
-    if (!isValidPostal(f.postalCode)) e.postalCode = "کد پستی باید ۱۰ رقم باشد";
-    if (!ship) e.shippingId = "روش ارسال را انتخاب کنید";
+    if (f.customerName.trim().length < 2) e["customerName"] = "نام و نام خانوادگی را وارد کنید";
+    if (!isValidMobile(f.mobile)) e["mobile"] = "شمارهٔ موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد";
+    if (!f.province) e["province"] = "استان را انتخاب کنید";
+    if (!f.city) e["city"] = "شهر را انتخاب کنید";
+    if (f.address.trim().length < 10) e["address"] = "نشانی کامل را وارد کنید";
+    if (!isValidPostal(f.postalCode)) e["postalCode"] = "کد پستی باید ۱۰ رقم باشد";
+    if (!ship) e["shippingId"] = "روش ارسال را انتخاب کنید";
     setErrors(e);
     return Object.keys(e).length === 0;
   }

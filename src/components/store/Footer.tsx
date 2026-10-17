@@ -19,7 +19,7 @@ export function Footer() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error("ایمیل معتبر وارد کنید");
+    if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error("ایمیل معتبر وارد کنید"); return; }
     setBusy(true);
     try {
       await subscribe({ data: { email } });
