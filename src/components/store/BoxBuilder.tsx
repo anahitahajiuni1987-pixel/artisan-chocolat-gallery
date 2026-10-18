@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { BOX_SIZES, MESSAGE_MAX, PRODUCTS, fa, getProduct, priceLine, toman } from "@/lib/catalog";
 import { useCart } from "@/lib/cart";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const PICKABLE = PRODUCTS.filter((p) => p.piecePrice !== null);
@@ -14,7 +15,7 @@ export function BoxBuilder() {
   const [sizeId, setSizeId] = useState<string>(BOX_SIZES[1].id);
   const [picks, setPicks] = useState<string[]>([]);
   const [message, setMessage] = useState("");
-  const size = BOX_SIZES.find((s) => s.id === sizeId)!;
+  const size = BOX_SIZES.find((s) => s.id === sizeId) ?? BOX_SIZES[1];
   const full = picks.length === size.pieces;
 
   const price = useMemo(() => {
@@ -26,7 +27,8 @@ export function BoxBuilder() {
     setPicks((p) => [...p, id]);
   }
   function changeSize(id: string) {
-    const s = BOX_SIZES.find((x) => x.id === id)!;
+    const s = BOX_SIZES.find((x) => x.id === id);
+    if (!s) return;
     setSizeId(id);
     setPicks((p) => p.slice(0, s.pieces));
   }
@@ -51,11 +53,11 @@ export function BoxBuilder() {
           <legend className="mb-4 text-sm text-muted-foreground">۱. اندازهٔ جعبه</legend>
           <div className="grid grid-cols-3 gap-3">
             {BOX_SIZES.map((s) => (
-              <button key={s.id} type="button" onClick={() => changeSize(s.id)} aria-pressed={s.id === sizeId}
-                className={cn("border px-3 py-4 text-center transition", s.id === sizeId ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary")}>
+              <Button variant="outline" key={s.id} type="button" onClick={() => changeSize(s.id)} aria-pressed={s.id === sizeId}
+                className={cn("h-auto whitespace-normal border px-2 py-4 text-center transition", s.id === sizeId ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary")}>
                 <span className="block font-display text-lg">{s.label}</span>
                 <span className="mt-1 block text-xs opacity-75">جعبه: {toman(s.base)}</span>
-              </button>
+              </Button>
             ))}
           </div>
         </fieldset>
@@ -65,15 +67,15 @@ export function BoxBuilder() {
             {PICKABLE.map((p) => {
               const n = picks.filter((x) => x === p.id).length;
               return (
-                <button key={p.id} type="button" onClick={() => choose(p.id)} disabled={p.stock <= 0}
-                  className="group relative flex items-center gap-3 border border-border bg-card p-2 text-right transition hover:border-gold disabled:opacity-40">
+                <Button variant="outline" key={p.id} type="button" onClick={() => choose(p.id)} disabled={p.stock <= 0}
+                  className="group relative flex h-auto flex-col items-start gap-2 whitespace-normal border border-border bg-card p-2 text-right sm:flex-row sm:items-center transition hover:border-gold disabled:opacity-40">
                   <img src={p.image} alt="" loading="lazy" width={64} height={64} className="h-14 w-14 rounded-full object-cover" />
                   <span className="min-w-0">
                     <span className="block truncate text-sm">{p.name}</span>
-                    <span className="block text-xs text-muted-foreground">{toman(p.piecePrice!)}</span>
+                    <span className="block text-xs text-muted-foreground">{toman(p.piecePrice ?? 0)}</span>
                   </span>
                   {n > 0 && <span className="absolute top-1 left-1 rounded-full bg-gold px-1.5 text-[10px] text-gold-foreground">×{fa(n)}</span>}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -94,16 +96,16 @@ export function BoxBuilder() {
               {Array.from({ length: size.pieces }, (_, i) => {
                 const p = picks[i] ? getProduct(picks[i]) : undefined;
                 return (
-                  <button key={i} type="button" disabled={!p} onClick={() => setPicks((x) => x.filter((_, j) => j !== i))}
+                  <Button variant="outline" key={i} type="button" disabled={!p} onClick={() => setPicks((x) => x.filter((_, j) => j !== i))}
                     aria-label={p ? `حذف ${p.name}` : "خانهٔ خالی"}
-                    className="group relative aspect-square rounded-full bg-cocoa/60 ring-1 ring-gold/25">
+                    className="group relative h-auto w-full aspect-square rounded-full p-0 bg-cocoa/60 ring-1 ring-gold/25">
                     {p && (
                       <>
                         <img src={p.image} alt={p.name} className="h-full w-full rounded-full object-cover" />
                         <span className="absolute inset-0 hidden items-center justify-center rounded-full bg-cocoa/70 group-hover:flex"><X className="h-4 w-4" /></span>
                       </>
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -115,10 +117,10 @@ export function BoxBuilder() {
             <span className="text-sm text-cocoa-muted">مبلغ</span>
             <span className="font-display text-2xl">{toman(price)}</span>
           </div>
-          <button type="button" onClick={addToCart} disabled={!full}
-            className="mt-5 w-full rounded-sm bg-gold py-3.5 text-sm font-medium text-gold-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40">
+          <Button variant="outline" type="button" onClick={addToCart} disabled={!full}
+            className="mt-5 h-auto w-full whitespace-normal rounded-sm bg-gold py-3.5 text-sm font-medium text-gold-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40">
             {full ? "افزودن به سبد" : `${fa(size.pieces - picks.length)} قطعهٔ دیگر انتخاب کنید`}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

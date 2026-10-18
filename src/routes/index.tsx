@@ -6,6 +6,8 @@ import { BoxBuilder } from "@/components/store/BoxBuilder";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "آناهیتا | تکه‌ای کوچک از هنر — شکلات دست‌ساز" },
       { name: "description", content: "شکلات‌های دست‌ساز، جعبه‌های هدیه و جعبهٔ دلخواه با پیام شخصی. ارسال به سراسر ایران." },
       { property: "og:title", content: "آناهیتا | تکه‌ای کوچک از هنر" },

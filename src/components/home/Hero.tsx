@@ -1,9 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import giftClosed from "@/assets/gift-closed.jpg";
 
 const Hero3D = lazy(() => import("./Hero3D"));
+
+class VisualBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? <StaticVisual /> : this.props.children; }
+}
 
 type Mode = "pending" | "3d" | "static";
 
@@ -18,32 +24,55 @@ export function Hero() {
   const reduced = useReducedMotion();
   const [mode, setMode] = useState<Mode>("pending");
   const [offsetX, setOffsetX] = useState(-1.9);
+  const section = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(true);
 
   useEffect(() => {
-    const w = window.innerWidth;
-    setMode(w < 768 ? "static" : "3d");
-    setOffsetX(w < 1100 ? -1.2 : -1.9);
+    const update = () => {
+      let supported = false;
+      try {
+        const canvas = document.createElement("canvas");
+        const gl = canvas.getContext("webgl2");
+        supported = !!gl;
+        gl?.getExtension("WEBGL_lose_context")?.loseContext();
+      } catch { /* use photo when WebGL is unavailable */ }
+      const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+      setMode(window.innerWidth < 768 || reduced || connection?.saveData || !supported ? "static" : "3d");
+      setOffsetX(window.innerWidth < 1100 ? -1.2 : -1.9);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [reduced]);
+
+  useEffect(() => {
+    let visible = true;
+    const update = () => setActive(visible && !document.hidden);
+    const observer = new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; update(); });
+    if (section.current) observer.observe(section.current);
+    document.addEventListener("visibilitychange", update);
+    return () => { observer.disconnect(); document.removeEventListener("visibilitychange", update); };
   }, []);
 
   return (
-    <section className="relative h-[100svh] min-h-[640px] overflow-hidden text-cocoa-foreground" style={{ background: "var(--gradient-hero)" }}>
+    <section ref={section} className="relative h-[92svh] min-h-[540px] md:min-h-[560px] overflow-hidden text-cocoa-foreground" style={{ background: "var(--gradient-hero)" }}>
       <div className="absolute inset-0" aria-hidden={mode === "3d"}>
-        {mode === "static" && <StaticVisual />}
+        {mode !== "3d" && <StaticVisual />}
         {mode === "3d" && (
-          <Suspense fallback={null}>
-            <Hero3D still={!!reduced} offsetX={offsetX} />
-          </Suspense>
+          <VisualBoundary><Suspense fallback={<StaticVisual />}>
+            <Hero3D still={!!reduced} offsetX={offsetX} active={active} fallback={<StaticVisual />} />
+          </Suspense></VisualBoundary>
         )}
       </div>
       <div className="pointer-events-none absolute inset-0" style={{ background: "var(--gradient-veil)" }} />
       {mode === "static" && <div className="pointer-events-none absolute inset-0 bg-cocoa/55" />}
 
-      <div className="container-lux pointer-events-none relative flex h-full flex-col justify-center">
+      <div className="container-lux pointer-events-none relative flex h-full pt-16 flex-col justify-center">
         <motion.div
           className="pointer-events-auto max-w-xl"
           initial={reduced ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.4, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: reduced ? 0 : 1.4, delay: reduced ? 0 : 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="eyebrow mb-6 flex items-center gap-3">
             <span className="h-px w-10 bg-gold" /> شکلات‌های دست‌ساز آناهیتا

@@ -6,6 +6,8 @@ import { PRODUCTS } from "@/lib/catalog";
 export const Route = createFileRoute("/collections")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "مجموعه‌ها و جعبه‌های هدیه | آناهیتا" },
       { name: "description", content: "جعبه‌های هدیه برای سالگرد، تولد، ولنتاین، یلدا و نوروز." },
       { property: "og:title", content: "مجموعه‌های هدیهٔ آناهیتا" },

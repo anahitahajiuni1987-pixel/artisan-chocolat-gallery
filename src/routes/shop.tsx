@@ -13,6 +13,8 @@ export const Route = createFileRoute("/shop")({
   }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "فروشگاه | آناهیتا" },
       { name: "description", content: "همهٔ شکلات‌ها، ترافل‌ها و جعبه‌های هدیهٔ دست‌ساز آناهیتا با قیمت به تومان." },
       { property: "og:title", content: "فروشگاه آناهیتا" },

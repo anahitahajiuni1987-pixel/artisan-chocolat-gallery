@@ -4,13 +4,17 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { availableShipping, priceLine, toman } from "@/lib/catalog";
 import { useCart } from "@/lib/cart";
-import { isValidMobile, isValidPostal, PROVINCES } from "@/lib/iran";
+import { PROVINCES } from "@/lib/iran";
 import { createOrder } from "@/lib/orders.functions";
+import { validateCheckout } from "@/lib/checkout-validation";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "تکمیل خرید | آناهیتا" },
       { name: "description", content: "ثبت مشخصات ارسال و سفارش" },
       { property: "og:title", content: "تکمیل خرید آناهیتا" },
@@ -44,14 +48,7 @@ function Checkout() {
     );
 
   function validate() {
-    const e: { [k: string]: string } = {};
-    if (f.customerName.trim().length < 2) e["customerName"] = "نام و نام خانوادگی را وارد کنید";
-    if (!isValidMobile(f.mobile)) e["mobile"] = "شمارهٔ موبایل باید با ۰۹ شروع شود و ۱۱ رقم باشد";
-    if (!f.province) e["province"] = "استان را انتخاب کنید";
-    if (!f.city) e["city"] = "شهر را انتخاب کنید";
-    if (f.address.trim().length < 10) e["address"] = "نشانی کامل را وارد کنید";
-    if (!isValidPostal(f.postalCode)) e["postalCode"] = "کد پستی باید ۱۰ رقم باشد";
-    if (!ship) e["shippingId"] = "روش ارسال را انتخاب کنید";
+    const e = validateCheckout(f);
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -59,6 +56,7 @@ function Checkout() {
   async function submit(ev: React.FormEvent) {
     ev.preventDefault();
     if (!validate()) { toast.error("لطفاً خطاهای فرم را بررسی کنید"); return; }
+    if (busy) return;
     setBusy(true);
     try {
       const res = await send({ data: { ...f, lines: lines.map(({ key: _k, ...l }) => l) } });
@@ -71,7 +69,7 @@ function Checkout() {
     }
   }
 
-  const Err = ({ k }: { k: string }) => (errors[k] ? <p className="mt-1 text-xs text-destructive">{errors[k]}</p> : null);
+  const Err = ({ k }: { k: string }) => (errors[k] ? <p id={`error-${k}`} role="alert" className="mt-1 text-xs text-destructive">{errors[k]}</p> : null);
 
   return (
     <form onSubmit={submit} noValidate className="container-lux grid gap-14 pb-28 pt-32 md:pt-40 lg:grid-cols-12">
@@ -79,21 +77,21 @@ function Checkout() {
         <h1 className="text-4xl md:text-5xl">تکمیل خرید</h1>
         <section className="grid gap-4 sm:grid-cols-2">
           <h2 className="font-sans text-sm font-semibold sm:col-span-2">مشخصات گیرنده</h2>
-          <div><label className="mb-1 block text-sm">نام و نام خانوادگی</label><input className={field} value={f.customerName} onChange={(e) => set("customerName", e.target.value)} /><Err k="customerName" /></div>
-          <div><label className="mb-1 block text-sm">موبایل</label><input className={field} dir="ltr" inputMode="numeric" placeholder="09xxxxxxxxx" value={f.mobile} onChange={(e) => set("mobile", e.target.value)} /><Err k="mobile" /></div>
-          <div><label className="mb-1 block text-sm">استان</label>
-            <select className={field} value={f.province} onChange={(e) => setF((p) => ({ ...p, province: e.target.value, city: "", shippingId: "" }))}>
+          <div><label htmlFor="customerName" className="mb-1 block text-sm">نام و نام خانوادگی</label><input id="customerName" aria-invalid={!!errors["customerName"]} aria-describedby={errors["customerName"] ? "error-customerName" : undefined} className={field} value={f.customerName} onChange={(e) => set("customerName", e.target.value)} /><Err k="customerName" /></div>
+          <div><label htmlFor="mobile" className="mb-1 block text-sm">موبایل</label><input id="mobile" aria-invalid={!!errors["mobile"]} aria-describedby={errors["mobile"] ? "error-mobile" : undefined} className={field} dir="ltr" inputMode="numeric" placeholder="09xxxxxxxxx" value={f.mobile} onChange={(e) => set("mobile", e.target.value)} /><Err k="mobile" /></div>
+          <div><label htmlFor="province" className="mb-1 block text-sm">استان</label>
+            <select id="province" aria-invalid={!!errors["province"]} aria-describedby={errors["province"] ? "error-province" : undefined} className={field} value={f.province} onChange={(e) => setF((p) => ({ ...p, province: e.target.value, city: "", shippingId: "" }))}>
               <option value="">انتخاب کنید</option>
               {Object.keys(PROVINCES).map((p) => <option key={p}>{p}</option>)}
             </select><Err k="province" /></div>
-          <div><label className="mb-1 block text-sm">شهر</label>
-            <select className={field} value={f.city} disabled={!f.province} onChange={(e) => set("city", e.target.value)}>
+          <div><label htmlFor="city" className="mb-1 block text-sm">شهر</label>
+            <select id="city" aria-invalid={!!errors["city"]} aria-describedby={errors["city"] ? "error-city" : undefined} className={field} value={f.city} disabled={!f.province} onChange={(e) => set("city", e.target.value)}>
               <option value="">انتخاب کنید</option>
               {(PROVINCES[f.province] ?? []).map((c) => <option key={c}>{c}</option>)}
             </select><Err k="city" /></div>
-          <div className="sm:col-span-2"><label className="mb-1 block text-sm">نشانی کامل</label><textarea rows={3} className={field} value={f.address} onChange={(e) => set("address", e.target.value)} /><Err k="address" /></div>
-          <div><label className="mb-1 block text-sm">کد پستی (۱۰ رقم)</label><input className={field} dir="ltr" inputMode="numeric" value={f.postalCode} onChange={(e) => set("postalCode", e.target.value)} /><Err k="postalCode" /></div>
-          <div className="sm:col-span-2"><label className="mb-1 block text-sm">یادداشت هدیه برای گیرنده (اختیاری)</label><textarea rows={2} maxLength={300} className={field} value={f.giftNote} onChange={(e) => set("giftNote", e.target.value)} /></div>
+          <div className="sm:col-span-2"><label htmlFor="address" className="mb-1 block text-sm">نشانی کامل</label><textarea id="address" aria-invalid={!!errors["address"]} aria-describedby={errors["address"] ? "error-address" : undefined} rows={3} className={field} value={f.address} onChange={(e) => set("address", e.target.value)} /><Err k="address" /></div>
+          <div><label htmlFor="postalCode" className="mb-1 block text-sm">کد پستی (۱۰ رقم)</label><input id="postalCode" aria-invalid={!!errors["postalCode"]} aria-describedby={errors["postalCode"] ? "error-postalCode" : undefined} className={field} dir="ltr" inputMode="numeric" value={f.postalCode} onChange={(e) => set("postalCode", e.target.value)} /><Err k="postalCode" /></div>
+          <div className="sm:col-span-2"><label htmlFor="giftNote" className="mb-1 block text-sm">یادداشت هدیه برای گیرنده (اختیاری)</label><textarea id="giftNote" aria-invalid={!!errors["giftNote"]} aria-describedby={errors["giftNote"] ? "error-giftNote" : undefined} rows={2} maxLength={300} className={field} value={f.giftNote} onChange={(e) => set("giftNote", e.target.value)} /></div>
         </section>
         <section>
           <h2 className="mb-4 font-sans text-sm font-semibold">روش ارسال</h2>
@@ -115,7 +113,7 @@ function Checkout() {
         <section>
           <h2 className="mb-4 font-sans text-sm font-semibold">روش پرداخت</h2>
           <label className="flex items-center gap-3 border border-primary p-4 text-sm"><input type="radio" checked readOnly /> کارت‌به‌کارت — پس از ثبت، رسید را بارگذاری می‌کنید</label>
-          <div className="mt-3 flex items-center gap-3 border border-dashed border-border p-4 text-sm text-muted-foreground"><input type="radio" disabled /> درگاه زرین‌پال — به‌زودی</div>
+          <div className="mt-3 flex items-center gap-3 border border-dashed border-border p-4 text-sm text-muted-foreground"><input type="radio" disabled /> درگاه زرین‌پال — هنوز فعال نشده است</div>
         </section>
       </div>
       <aside className="lg:col-span-5">
@@ -129,9 +127,9 @@ function Checkout() {
             <div className="flex justify-between"><span>ارسال</span><span>{ship ? toman(ship.cost) : "—"}</span></div>
             <div className="flex justify-between pt-2 font-display text-xl"><span>مبلغ نهایی</span><span>{toman(subtotal + (ship?.cost ?? 0))}</span></div>
           </div>
-          <button disabled={busy} className="mt-6 w-full rounded-sm bg-primary py-3.5 text-sm text-primary-foreground hover:bg-burgundy disabled:opacity-50">
+          <Button type="submit" disabled={busy} className="mt-6 h-auto w-full whitespace-normal rounded-sm bg-primary py-3.5 text-sm text-primary-foreground hover:bg-burgundy disabled:opacity-50">
             {busy ? "در حال ثبت…" : "ثبت سفارش"}
-          </button>
+          </Button>
         </div>
       </aside>
     </form>

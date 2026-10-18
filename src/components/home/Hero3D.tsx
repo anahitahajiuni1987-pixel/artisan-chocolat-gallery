@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Environment, Float, Lightformer, RoundedBox } from "@react-three/drei";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import * as THREE from "three";
 
 const CHOC_DARK = "#2b160e";
@@ -173,9 +173,9 @@ function Rig({ still, offsetX }: { still: boolean; offsetX: number }) {
   );
 }
 
-export default function Hero3D({ still, offsetX }: { still: boolean; offsetX: number }) {
+export default function Hero3D({ still, offsetX, active, fallback }: { still: boolean; offsetX: number; active: boolean; fallback: ReactNode }) {
   return (
-    <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 4, 15], fov: 32 }} gl={{ antialias: true, alpha: true }}>
+    <Canvas fallback={fallback} frameloop={active ? "always" : "never"} shadows dpr={[1, 1.5]} camera={{ position: [0, 4, 15], fov: 32 }} gl={{ antialias: true, alpha: true }}>
       <ambientLight intensity={0.25} />
       <spotLight position={[6, 9, 6]} angle={0.4} penumbra={0.8} intensity={140} color="#ffe2b8" castShadow shadow-mapSize={[1024, 1024]} />
       <pointLight position={[-6, 2, -4]} intensity={30} color="#c46a3a" />

@@ -4,6 +4,8 @@ import { BoxBuilder } from "@/components/store/BoxBuilder";
 export const Route = createFileRoute("/build")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "ساخت جعبهٔ دلخواه | آناهیتا" },
       { name: "description", content: "اندازهٔ جعبه را انتخاب کنید، طعم‌ها را بچینید و پیام هدیهٔ شخصی بنویسید." },
       { property: "og:title", content: "جعبهٔ دلخواه آناهیتا" },
