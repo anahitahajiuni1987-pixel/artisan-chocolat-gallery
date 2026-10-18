@@ -10,7 +10,9 @@ export const Route = createFileRoute("/order/$code")({
   validateSearch: (s: Record<string, unknown>): { m?: string | undefined } => ({ m: typeof s["m"] === "string" ? s["m"].slice(0, 20) : undefined }),
   head: () => ({
     meta: [
-      { title: "پیگیری سفارش | آناهیتا" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { title: "وضعیت و رسید سفارش | آناهیتا" },
       { name: "description", content: "وضعیت سفارش و ارسال رسید پرداخت" },
       { property: "og:title", content: "پیگیری سفارش آناهیتا" },
       { property: "og:description", content: "وضعیت سفارش" },
@@ -27,16 +29,17 @@ function OrderPage() {
   const upload = useServerFn(uploadReceipt);
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
-  const q = useQuery({ queryKey: ["order", code, m], enabled: !!m, queryFn: () => fetchOrder({ data: { code, mobile: m! } }) });
+  const q = useQuery({ queryKey: ["order", code, m], enabled: !!m, queryFn: () => fetchOrder({ data: { code, mobile: m ?? "" } }) });
 
   async function onFile(file: File) {
+    if (!m) return;
     if (file.size > 5 * 1024 * 1024) { toast.error("حجم فایل باید کمتر از ۵ مگابایت باشد"); return; }
     setBusy(true);
     try {
       const buf = new Uint8Array(await file.arrayBuffer());
       let bin = "";
       for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-      await upload({ data: { code, mobile: m!, contentType: file.type, base64: btoa(bin) } });
+      await upload({ data: { code, mobile: m ?? "", contentType: file.type, base64: btoa(bin) } });
       toast.success("رسید ارسال شد");
       qc.invalidateQueries({ queryKey: ["order", code, m] });
     } catch (e) {
@@ -62,7 +65,7 @@ function OrderPage() {
         <section className="mt-10 border border-gold/60 bg-card p-6">
           <h2 className="font-sans text-base font-semibold">پرداخت کارت‌به‌کارت</h2>
           <p className="mt-3 text-sm leading-7">لطفاً مبلغ <strong>{toman(o.total)}</strong> را واریز کرده و تصویر رسید را بارگذاری کنید.</p>
-          <p className="mt-2 text-sm leading-7 text-muted-foreground">شمارهٔ کارت فروشگاه هنوز ثبت نشده است و پس از تأیید سفارش از طریق پیامک برای شما ارسال می‌شود.</p>
+          <p className="mt-2 text-sm leading-7 text-muted-foreground">شمارهٔ کارت فروشگاه هنوز ثبت نشده است؛ تا دریافت مشخصات واقعی از فروشگاه، وجهی واریز نکنید.</p>
           <label className="mt-5 inline-flex cursor-pointer rounded-sm bg-primary px-6 py-3 text-sm text-primary-foreground">
             {busy ? "در حال ارسال…" : o.hasReceipt ? "ارسال رسید جدید" : "بارگذاری رسید"}
             <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="sr-only" disabled={busy}

@@ -3,6 +3,7 @@ import { ShoppingBag, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { fa } from "@/lib/catalog";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -54,15 +55,15 @@ export function Header() {
               </span>
             )}
           </Link>
-          <button className="rounded-full p-2 md:hidden" onClick={() => setOpen((o) => !o)} aria-label="منو" aria-expanded={open}>
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((o) => !o)} aria-label="منو" aria-expanded={open} aria-controls="mobile-menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          </Button>
         </div>
       </div>
       {open && (
-        <nav className="container-lux flex flex-col gap-1 pb-6 md:hidden" aria-label="ناوبری موبایل">
+        <nav id="mobile-menu" className="container-lux flex flex-col gap-1 bg-background pb-6 md:hidden" aria-label="ناوبری موبایل">
           {NAV.map((n) => (
-            <Link key={n.to} to={n.to} className="border-b border-border/60 py-3 font-display text-lg">
+            <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="border-b border-border/60 py-3 font-display text-lg">
               {n.label}
             </Link>
           ))}

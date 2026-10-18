@@ -2,10 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { BOX_SIZES, fa, getProduct, priceLine, toman } from "@/lib/catalog";
 import { useCart, type CartLine } from "@/lib/cart";
+import { quantityLimit } from "@/lib/cart-logic";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "سبد خرید | آناهیتا" },
       { name: "description", content: "سبد خرید شکلات‌های آناهیتا" },
       { property: "og:title", content: "سبد خرید آناهیتا" },
@@ -43,13 +47,13 @@ function CartPage() {
           {lines.map((l) => {
             const priced = priceLine(l);
             return (
-              <li key={l.key} className="flex gap-5 py-6">
-                <img src={lineImage(l)} alt="" width={96} height={96} className="h-24 w-24 shrink-0 object-cover" />
+              <li key={l.key} className="flex gap-3 py-6 sm:gap-5">
+                <img src={lineImage(l)} alt="" width={96} height={96} className="h-16 w-16 shrink-0 object-cover sm:h-24 sm:w-24" />
                 <div className="flex min-w-0 flex-1 flex-col">
-                  <div className="flex justify-between gap-3">
+                  <div className="flex flex-col justify-between gap-2 sm:flex-row sm:gap-3">
                     <div className="min-w-0">
                       <p className="font-display text-xl">{priced.title}</p>
-                      <p className="truncate text-sm text-muted-foreground">{priced.detail}</p>
+                      <p className="break-words text-sm text-muted-foreground">{priced.detail}</p>
                       {l.kind === "box" && (
                         <p className="mt-1 text-xs text-muted-foreground">
                           {l.picks.map((id) => getProduct(id)?.name).join("، ")} — {BOX_SIZES.find((s) => s.id === l.sizeId)?.label}
@@ -60,11 +64,11 @@ function CartPage() {
                   </div>
                   <div className="mt-auto flex items-center gap-4 pt-3">
                     <div className="flex items-center border border-border">
-                      <button className="p-2" onClick={() => setQty(l.key, l.qty + 1)} aria-label="افزایش"><Plus className="h-3.5 w-3.5" /></button>
+                      <Button variant="ghost" size="icon" disabled={l.qty >= quantityLimit(l)} onClick={() => setQty(l.key, l.qty + 1)} aria-label="افزایش"><Plus className="h-3.5 w-3.5" /></Button>
                       <span className="w-7 text-center text-sm">{fa(l.qty)}</span>
-                      <button className="p-2" onClick={() => setQty(l.key, l.qty - 1)} aria-label="کاهش"><Minus className="h-3.5 w-3.5" /></button>
+                      <Button variant="ghost" size="icon" disabled={l.qty <= 1} onClick={() => setQty(l.key, l.qty - 1)} aria-label="کاهش"><Minus className="h-3.5 w-3.5" /></Button>
                     </div>
-                    <button onClick={() => remove(l.key)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /> حذف</button>
+                    <Button variant="ghost" size="sm" onClick={() => remove(l.key)} className="gap-1 text-xs text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /> حذف</Button>
                   </div>
                 </div>
               </li>

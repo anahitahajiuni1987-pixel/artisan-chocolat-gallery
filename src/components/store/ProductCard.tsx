@@ -3,10 +3,12 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import { toman, type Product } from "@/lib/catalog";
+import { Button } from "@/components/ui/button";
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
-  const v = product.variants[0]!;
+  const v = product.variants[0];
+  if (!v) return null;
   const out = product.stock <= 0;
   return (
     <article className="group">
@@ -22,7 +24,7 @@ export function ProductCard({ product }: { product: Product }) {
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">{out ? "ناموجود" : `از ${toman(v.price)}`}</p>
         </div>
-        <button
+        <Button variant="outline" size="sm"
           disabled={out}
           onClick={() => {
             add({ kind: "product", productId: product.id, variantId: v.id, qty: 1 });
@@ -32,7 +34,7 @@ export function ProductCard({ product }: { product: Product }) {
           aria-label={`افزودن سریع ${product.name}`}
         >
           <Plus className="h-3.5 w-3.5" /> افزودن سریع
-        </button>
+        </Button>
       </div>
     </article>
   );

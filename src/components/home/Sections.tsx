@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { useRef, type ReactNode } from "react";
 import { PRODUCTS } from "@/lib/catalog";
+import { useCompactLayout } from "@/hooks/use-compact-layout";
 import { ProductCard } from "@/components/store/ProductCard";
 import giftOpen from "@/assets/gift-open.jpg";
 import giftClosed from "@/assets/gift-closed.jpg";
@@ -17,8 +18,8 @@ import pistachio from "@/assets/p-pistachio-rose.jpg";
 export function Reveal({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
   const reduced = useReducedMotion();
   return (
-    <motion.div className={className} initial={reduced ? false : { opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }} transition={{ duration: 1, delay, ease: [0.22, 1, 0.36, 1] }}>
+    <motion.div className={className} initial={reduced ? false : { opacity: 0, y: 28 }} whileInView={reduced ? {} : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }} transition={{ duration: reduced ? 0 : 1, delay: reduced ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}>
       {children}
     </motion.div>
   );
@@ -54,8 +55,10 @@ export function SignatureCollection() {
 const FLY = [goldLeaf, saffron, rose, pistachio];
 
 export function ExperienceSequence() {
+  const compact = useCompactLayout();
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
+  const staticSequence = reduced || compact;
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const lidY = useTransform(p, [0.08, 0.45], ["0%", "-118%"]);
   const lidRot = useTransform(p, [0.08, 0.45], [0, -6]);
@@ -66,25 +69,25 @@ export function ExperienceSequence() {
   const flyOp = useTransform(p, [0.55, 0.75], [0, 1]);
 
   return (
-    <section ref={ref} className="relative bg-cocoa text-cocoa-foreground" style={{ height: reduced ? "auto" : "260vh" }}>
-      <div className={reduced ? "py-24" : "sticky top-0 flex h-screen items-center overflow-hidden"}>
+    <section ref={ref} className="relative bg-cocoa text-cocoa-foreground" style={{ height: staticSequence ? "auto" : "260vh" }}>
+      <div className={staticSequence ? "py-24" : "sticky top-0 flex h-screen items-center overflow-hidden"}>
         <div className="container-lux grid items-center gap-12 md:grid-cols-12">
           <div className="relative md:col-span-4">
             <p className="eyebrow mb-4">۰۲ — تجربهٔ شکلات</p>
-            <motion.div style={reduced ? {} : { opacity: t1 }}>
+            <motion.div style={staticSequence ? {} : { opacity: t1 }}>
               <h2 className="text-4xl md:text-5xl">لحظهٔ گشودن</h2>
               <p className="mt-5 leading-8 text-cocoa-muted">روبان باز می‌شود، درِ جعبه بالا می‌رود و عطر کاکائو پیش از هر چیز به استقبال می‌آید.</p>
             </motion.div>
-            <motion.div style={reduced ? {} : { opacity: t2 }} className={reduced ? "mt-8" : "absolute inset-x-0 top-10"}>
+            <motion.div style={staticSequence ? {} : { opacity: t2 }} className={staticSequence ? "mt-8" : "absolute inset-x-0 top-10"}>
               <h2 className="text-4xl md:text-5xl">و سپس، <span className="text-gold">کشف</span></h2>
               <p className="mt-5 leading-8 text-cocoa-muted">دوازده قطعه، هر کدام با شخصیتی متفاوت، در کنار هم چیده شده‌اند تا آرام‌آرام چشیده شوند.</p>
             </motion.div>
           </div>
           <div className="md:col-span-8">
-            <motion.div style={reduced ? {} : { scale }} className="relative mx-auto aspect-[1280/670] w-full max-w-3xl">
+            <motion.div style={staticSequence ? {} : { scale }} className="relative mx-auto aspect-[1280/670] w-full max-w-3xl">
               <img src={giftOpen} alt="جعبهٔ باز آناهیتا با دوازده شکلات" loading="lazy" width={1280} height={670}
                 className="absolute inset-0 h-full w-full object-cover shadow-[var(--shadow-lux)]" />
-              {!reduced && (
+              {!staticSequence && (
                 <motion.div style={{ y: lidY, rotate: lidRot }}
                   className="absolute inset-0 flex items-center justify-center bg-burgundy shadow-[var(--shadow-lux)]">
                   <div className="absolute inset-3 border border-gold/60" />
@@ -94,7 +97,7 @@ export function ExperienceSequence() {
                   </div>
                 </motion.div>
               )}
-              {!reduced && FLY.map((src, i) => <FlyImg key={i} src={src} i={i} progress={flyIn} opacity={flyOp} />)}
+              {!staticSequence && FLY.map((src, i) => <FlyImg key={i} src={src} i={i} progress={flyIn} opacity={flyOp} />)}
             </motion.div>
           </div>
         </div>

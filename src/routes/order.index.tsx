@@ -4,6 +4,8 @@ import { useState } from "react";
 export const Route = createFileRoute("/order/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "پیگیری سفارش | آناهیتا" },
       { name: "description", content: "با کد سفارش و شمارهٔ موبایل، وضعیت سفارش را ببینید." },
       { property: "og:title", content: "پیگیری سفارش آناهیتا" },
