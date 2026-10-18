@@ -54,7 +54,7 @@ export function BoxBuilder() {
           <div className="grid grid-cols-3 gap-3">
             {BOX_SIZES.map((s) => (
               <Button variant="outline" key={s.id} type="button" onClick={() => changeSize(s.id)} aria-pressed={s.id === sizeId}
-                className={cn("h-auto whitespace-normal border px-2 py-4 text-center transition", s.id === sizeId ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary")}>
+                className={cn("h-auto flex-col whitespace-normal border px-2 py-4 text-center transition", s.id === sizeId ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary")}>
                 <span className="block font-display text-lg">{s.label}</span>
                 <span className="mt-1 block text-xs opacity-75">جعبه: {toman(s.base)}</span>
               </Button>

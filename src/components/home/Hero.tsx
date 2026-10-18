@@ -6,9 +6,9 @@ import giftClosed from "@/assets/gift-closed.jpg";
 const Hero3D = lazy(() => import("./Hero3D"));
 
 class VisualBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? <StaticVisual /> : this.props.children; }
+  override render() { return this.state.failed ? <StaticVisual /> : this.props.children; }
 }
 
 type Mode = "pending" | "3d" | "static";
