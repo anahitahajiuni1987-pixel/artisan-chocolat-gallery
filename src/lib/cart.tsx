@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { priceLine, type CartLineInput } from "./catalog";
+import { addCartLine, restoreCart, withQuantity, type CartLine } from "./cart-logic";
 
-export type CartLine = CartLineInput & { key: string };
+export type { CartLine } from "./cart-logic";
 
 type CartCtx = {
   lines: CartLine[];
@@ -17,10 +18,6 @@ type CartCtx = {
 const Ctx = createContext<CartCtx | null>(null);
 const STORAGE_KEY = "anahita-cart-v1";
 
-function lineKey(l: CartLineInput) {
-  return l.kind === "product" ? `p:${l.productId}:${l.variantId}` : `b:${l.sizeId}:${l.picks.join(",")}:${l.message}`;
-}
-
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
@@ -29,27 +26,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as CartLine[];
-        setLines(parsed.filter((l) => { try { priceLine(l); return true; } catch { return false; } }));
+        setLines(restoreCart(JSON.parse(raw)));
       }
     } catch { /* ignore corrupt cart */ }
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (ready) localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
+    if (ready) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lines)); } catch { /* Cart still works when browser storage is unavailable. */ }
+    }
   }, [lines, ready]);
 
   const add = useCallback((line: CartLineInput) => {
-    const key = lineKey(line);
-    setLines((prev) => {
-      const found = prev.find((l) => l.key === key);
-      if (found) return prev.map((l) => (l.key === key ? { ...l, qty: Math.min(20, l.qty + line.qty) } : l));
-      return [...prev, { ...line, key }];
-    });
+    priceLine(line);
+    setLines((prev) => addCartLine(prev, line));
   }, []);
   const setQty = useCallback((key: string, qty: number) => {
-    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, qty: Math.max(1, Math.min(20, qty)) } : l)));
+    setLines((prev) => prev.map((l) => (l.key === key ? withQuantity(l, qty) : l)));
   }, []);
   const remove = useCallback((key: string) => setLines((prev) => prev.filter((l) => l.key !== key)), []);
   const clear = useCallback(() => setLines([]), []);
